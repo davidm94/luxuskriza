@@ -1,0 +1,16 @@
+https://github.com/davidm94/luxuskriza
+
+balíky:	graphicx	(obrázky)
+	hyperref	(krížový odkaz)
+	celveref	(krížový odkaz aj so slovom)
+
+funkcie: 	Príkazy na definovanie štruktúry dokumentu a obsahu
+	Formátovanie textu na úrovni odstavcov
+	Použitie zoznamov
+	Vkladanie obrázkov
+	Tvorba vzorcov
+
+	Bibliografia a citovanie pomocou nástroja BibTeX
+	Vkladanie zdrojových kódov
+	krížové odkazy
+	Sádzanie špeciálnych znakov ako uvodzovky, percentá a podobne

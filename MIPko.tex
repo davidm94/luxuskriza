@@ -2,10 +2,9 @@
 
 
 \usepackage{graphicx}
-\usepackage{listings}
 \usepackage[hidelinks]{hyperref}
 \usepackage[nameinlink]{cleveref}
-%obrázky, zdrojový kód, hyperlink, hyperlink s menom
+%obrázky, hyperlink, hyperlink s menom
 
 \begin{document}
 \sloppy
@@ -21,7 +20,7 @@ Ilkovi\v{c}ova 2, 842 16 Bratislava, Slovakia\\
 
 \maketitle
 
-
+%abstrakt
 \begin{abstract}
 Recommendation plays a vital role in adaptive educational systems. Learners often face large body of educational materials including not only texts (explanations), but also interactive content such as exercises and questions. These require various knowledge levels of multiple topics. For effective learning, personalized recommendation of the most appropriate items according to the learner's current knowledge level and preferences is an essential feature. In this paper, we describe a learning object recommendation method based on students’ explicit difficulty ratings during and after exercise/question solving. It is based on comparing the learner’s state when the recommendation is to be made against his peers with similar knowledge in the moment when they rated the difficulty. To deal with sparsity of ratings that are even further filtered, we also propose two solutions to either adaptively elicit ratings in appropriate moments during learners work, or to predict ratings from implicit user actions. We evaluate the method in ALEF \textendash~adaptive web-based educational system.
 
@@ -52,6 +51,7 @@ The rest of this paper is organized as follows. In section \ref{sec2}, we descri
 
 We consider two sources of learning object difficulty:
 
+%zoznam s odrážkami
 \begin{itemize}
 \item \emph{Expert estimated static difficulty}. When a domain expert authors exercises and questions for the educational system, and creates a domain model of relevant domain terms, prerequisite relations, learning objects properties, etc., they also estimate learning object difficulty. This can be a numeral rating for the object, for example 0.1 for trivial exercise, to 1.0 for advanced material, or expressed as a weighted relation to various relevant domain terms. In our case, we consider difficulty as a single scalar value, but combined with weighted \emph{related-to} relations between learning objects and relevant domain terms. This difficulty estimation is considered ``static'', it depends only on the content in the educational system.
 \item \emph{Dynamic student determined difficulty}. When learner interacts with a learning object (exercise or question), they have opportunity to provide explicit expression of its difficulty for them. After the learner submits a solution, they can use interface under the object, shown in \cref{fig1}, to express their opinion on its difficulty. Note that the scale does not have a neutral value and we mapped the response to values $\langle 0,1 \rangle$ such that the \emph{Relatively difficult} option is the optimal (middle) difficulty. We consider this expression of difficulty ``dynamic''. The learner rates according to their experience with the learning object and their current state.
@@ -61,7 +61,7 @@ The ALEF is currently being used for its fifth year, having served over 1200 stu
 
 This can be explained by the fact that ``in the wild'', when students freely choose learning objects without recommendation, they will choose learning objects both currently too easy and too difficult for them. This comparison is made per learning object and users randomly choosing a given learning object when it is too difficult and too easy will cancel out each other and the final rating for the object would mimic the general difficulty estimation of the expert (e.g. an object is more often too easy). This observation could be useful for crowdsourcing the static difficulty from learners.
 
-
+%obrázky
 \begin{figure}
 \centering
 \includegraphics[width=\textwidth]{images/fig1.png}
@@ -79,6 +79,7 @@ We can, however, not only observe the ratings as aggregated per object averaging
 
 We propose a method for learning object recommendation based on the following assumptions from related work and observed user behaviour in ALEF:
 
+%číselný zoznam
 \begin{enumerate}
 \item When a learner rates learning object difficulty, they consider not only objective general difficulty of the exercise/question, but they do so based on their experience with the learning object and their current knowledge.
 \item An optimal learning object for the learner should have appropriate difficulty for their knowledge. If the learning object was too easy, both the learner would learn too little, and there would be little information gain for the user modelling component of the educational system. On the other hand, if the learning object was too difficult, the learner could be dissuaded from trying, or not even able to solve it.
@@ -87,7 +88,8 @@ We propose a method for learning object recommendation based on the following as
 
 The recommendation method looks for difficulty ratings of candidate learning objects (LOs) to be recommended. Only those ratings are considered, which are made by users who had the same or similar level of knowledge for relevant domain terms related to the given learning object during interaction with it and when expressing the difficulty rating afterwards. The method works as follows:
 
-\begin{lstlisting}[language={}]
+%prostredie pre zdrojový kód
+\begin{verbatim}
 function get_recommendations(user)
   var unsolved = find_unsolved_LOs(user, FADE_TIME)
   var lo_candidates = []
@@ -99,17 +101,19 @@ function get_recommendations(user)
 
   return lo_candidates.sort_by_difficulty.pick(TOP_N)
 end
-\end{lstlisting}
+\end{verbatim}
 
 We set optimal difficulty (\verb|OPTIMAL_DIFF|) to 0.5 from the range $\langle 0,1 \rangle$. Note that while we are looking for difficulty appropriate for the learner knowledge, which is not necessarily a difficulty 0.5 of the learning object, we are predicting difficulty from peer users considering their knowledge in the moment of rating, therefore this aspect is carried over in the predicted difficulty, not in the optimal difficulty. \verb|FADE_TIME| represents time function for which is the learning object considered solved and not to be recommended again. Its shape depends on how is the recommendation deployed, e.g., in long term use as a course support, a value related to (a multiple of) time distance between subsequent lessons should be used; in short term ``crash-courses'', the fade time can be in hours, or even infinite in order to not to repeat any learning objects at all. Here, we recommended top 4 items (\verb|TOP_N| = 4).
 
 The difficulty predicted from similar peers is calculated as a weighted arithmetic mean of difficulty ratings from knowledge-similar users weighted by their similarity to target user (denoted \emph{U}):
 
+%vzorec
 $predicted\_difficulty (U,LO)$
 $$=\frac{\sum_i rating (U_i, LO) * sim \Bigg(U, U_i, LO, time \Big(rating (U_i, LO)\Big)\Bigg)}{\sum_i sim (U, U_i, LO)}$$
 
 The learner similarity for a given learning object considers only knowledge (understanding), \emph{underst(user, relevant\_term, time)}, of those relevant domain terms, \emph{prereq(LO)} that are required to understand and solve the given learning object, \emph{LO}. For a target user, we consider their current knowledge in the time of recommendation, and for peers, we consider their knowledge at the time when they produced rating for the object. The similarity is based on Euclidean distance of learners' knowledge:
 
+%vzorec
 $sim(U, U_x, LO, time) =$
 $$1-\frac{\sqrt{\sum_{RDT_i\epsilon prereq(LO)}\Big(underst(U, RDT_i, now) - underst(U_x, RDT_i, time)\Big)^2}}{\sqrt{|prereq (LO)|}}$$
 
@@ -118,17 +122,20 @@ When the learner follows one of the shown recommendations and provides difficult
 \section{Evaluation}
 \label{sec4}
 
-We evaluated the proposed method with students evenly distributed into two groups. One group was shown recommendations derived from learning object difficulty determined by peer students (the \emph{proposed method,} see section 3) and the other group was shown recommendations using static learning object difficulty estimated by a domain expert responsible for course authoring (a \emph{control method}).
+We evaluated the proposed method with students evenly distributed into two groups. One group was shown recommendations derived from learning object difficulty determined by peer students (the \emph{proposed method,} see section \ref{sec3}) and the other group was shown recommendations using static learning object difficulty estimated by a domain expert responsible for course authoring (a \emph{control method}).
 
 The \emph{control method} gathers list of learning objects that could be possibly recommended (i.e., user has not solved them recently) and compares user's knowledge of all relevant domain terms that need to be understood to solve the exercise/question with its difficulty. For example, we are considering a learning object $LO_1$ to be recom-mended to user $U$ and in order to solve the $LO_1$, the user must have understood relevant domain terms $prereq(LO_1) = \{RDT_1 ...RDT_N\}$, e.g., in order to solve exercise $LO_1$= ``Number division'' (C programming language), relevant domain terms $RDT_1$= ``Operator \/'' and $RDT_2$ = ``double'' must be understood (multiple other terms are required, but omitted here for simplicity). If $underst(U, RDT_1) = 0.5$ and $underst(U, RDT_2) = 0.7$ and:
 
+%vzorec
 $$required\_knowledge(U, LO_1) = \frac{\sum_{RDT_i\epsilon prereq(LO_1)} underst(U, RDT_i)}{|prereq(LO_1)|}$$
+
 then the required knowledge is in this case 0.6. This is compared with $difficulty (LO_1)$ and the closer is the user's knowledge to the difficulty, the more likely is $LO_1$ to be recommended. In other words, if the student knows very little from the prerequisites for a given learning object, the easier it must be in order to be appropriate to them, and vice versa, when the student knows almost everything needed for the learning object, it is only recommended when it is difficult, so it would still pose at least a little challenge to the student.
 
-\emph{Results.} We evaluated the proposed method in a controlled experiment with 30 students from various technical universities learning in the course on procedural programming using C language. The students have had some previous knowledge of procedural programming, some had experience specifically with the C language, therefore after a brief familiarization with the course by reading through some explanation-type learning objects, they were able to almost immediately start with both introductory and more advanced exercises and questions. Because the user input – difficulty rating after following a recommendation – is crucial for the proposed method to offer recommendation to other students, all students participated in the experiment at the same time in one three hour session.
+\emph{Results} We evaluated the proposed method in a controlled experiment with 30 students from various technical universities learning in the course on procedural programming using C language. The students have had some previous knowledge of procedural programming, some had experience specifically with the C language, therefore after a brief familiarization with the course by reading through some explanation-type learning objects, they were able to almost immediately start with both introductory and more advanced exercises and questions. Because the user input \textendash~difficulty rating after following a recommendation \textendash~is crucial for the proposed method to offer recommendation to other students, all students participated in the experiment at the same time in one three hour session.
 
 Our hypotheses for the experiment were as follows:
 
+%zoznam s odrážkami
 \begin{itemize}
 \item $H_1$. \emph{Learning objects recommended based on difficulty are more appropriate than those selected freely by students themselves.}
 \item $H_2$. \emph{Learning objects recommended based on dynamic student determined difficulty (proposed method) are more appropriate than those recommended based on expert estimated static difficulty (control method).}
@@ -160,6 +167,7 @@ When predicting whether a given item would be too difficult for a user, it is im
 
 \section{Conclusions}
 \label{sec6}
+
 In this paper, we centred on two approaches to learning object difficulty in adaptive educational systems: dynamic student determined difficulty and expert estimated static difficulty. The properties of these difficulty ratings were evaluated from the long term usage of ALEF adaptive educational system in multiple courses.
 
 We proposed a recommendation method considering difficulty predicted for a given target user from difficulty ratings expressed by their peers while having similar knowledge to the target user. We also described a control recommendation method that picks learning object based only on knowledge of the target user and domain expert estimated difficulty. These two methods were compared in a controlled experiment with two groups of students using the proposed and the control method respectively. The group with proposed recommendation approach outperformed the control group only negligibly in the knowledge gained throughout the experiment, possibly due to the short scope of the experiment. However, the difficulty ratings expressed after using self-chosen learning objects and after using learning objects suggested by proposed and control methods suggest that the user learning experience is better using the difficulty-based recommendation method, since users receive learning objects with appropriate difficulty for them.
@@ -168,8 +176,10 @@ The control method which considered only user’s knowledge with static difficul
 
 In future work, the recommendation can be further personalized for preferences of each learner. We have assumed that the optimal exercises/questions are those with medium difficulty for the learner’s current knowledge, which is actually best to progress further without dissuading the learner and to model user's knowledge. However one learner can welcome the challenge and prefer more difficult learning objects, or on the other hand can be easily dissuaded by even moderately difficult ones. This could be detected, for example, by comparing learner ratings after using recommendations to their peer ratings, by observing successfulness of solving recommended items, or even by observing whether the learner has left the learning object without attempting a solution. Conserving the same rating prediction mechanisms described here, one learner could receive recommendations computed for different (personalized) target difficulty than another.
 
+%acknowledgement
 \textbf\ackname This work was partially supported by grants. No. VG1/0971/11,KEGA 009STU-4/2014, and APVV-0233-10. We thank Matej Noga for recommend-er method implementation in ALEF system.
 
+%referencie
 \bibliographystyle{splncs03}
 \bibliography{zdroje}
 
